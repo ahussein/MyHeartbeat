@@ -65,7 +65,7 @@ public class HeartbeatService extends Service implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor mHeartRateSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         // delay SENSOR_DELAY_UI is sufficiant
-        boolean res = mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        boolean res = mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_UI);
         Log.d(LOG_TAG, " sensor registered: " + (res ? "yes" : "no"));
 
         mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();

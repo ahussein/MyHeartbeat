@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     File root = Environment.getExternalStorageDirectory();
     ArrayList<String> content = new ArrayList<String>();
     String header = "lat,lng,time,heartbeat\n";
+    Integer mLastKnownHeartbeat;
 
     private void writeCsvData(ArrayList<String> data) throws IOException {
         File gpxfile = new File(root, String.format("labs_heartrate_%s.csv", new Timestamp(new java.util.Date().getTime()).getTime()));
@@ -53,18 +54,19 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 //            Toast.makeText(MainActivity.this, "handleMessage" + mCurrentLocation, Toast.LENGTH_SHORT).show();
             if(textView!=null && mCurrentLocation!=null) {
                 textView.setText(Integer.toString(msg.what));
-                String value = String.format("%f,%f,%s,%d\n", mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
-                        new Timestamp(new java.util.Date().getTime()).getTime(), msg.what);
-                if (content.size() == 500){
-                    try{
-                        writeCsvData(content);
-                    }catch(IOException e){
-                        e.printStackTrace();
-                    }
-
-                    content.clear();
-                }
-                content.add(value);
+                mLastKnownHeartbeat = msg.what;
+//                String value = String.format("%f,%f,%s,%d\n", mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+//                        new Timestamp(new java.util.Date().getTime()).getTime(), msg.what);
+//                if (content.size() == 500){
+//                    try{
+//                        writeCsvData(content);
+//                    }catch(IOException e){
+//                        e.printStackTrace();
+//                    }
+//
+//                    content.clear();
+//                }
+//                content.add(value);
 //                Toast.makeText(MainActivity.this, "handleMessage: " + value, Toast.LENGTH_SHORT).show();
             }
             else if(textView !=null)
@@ -108,7 +110,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     protected LocationRequest createLocationRequest() {
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
+        mLocationRequest.setInterval(5000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return mLocationRequest;
@@ -150,7 +152,18 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-//        Toast.makeText(this, "location changed" + mCurrentLocation.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "location changed" + mCurrentLocation.toString(), Toast.LENGTH_SHORT).show();
+        String value = String.format("%f,%f,%s,%d\n", mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+                new Timestamp(new java.util.Date().getTime()).getTime(), mLastKnownHeartbeat);
+        if (content.size() == 30){
+            try{
+                writeCsvData(content);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+            content.clear();
+        }
+        content.add(value);
     }
 }
 
